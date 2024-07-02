@@ -2,7 +2,6 @@ import numpy as np
 import librosa
 import librosa.display
 import matplotlib.pyplot as plt
-import os
 
 
 def extract_spectrogram(audio, sr, file_name, save_dir, type="npy"):

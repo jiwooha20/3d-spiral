@@ -3,7 +3,7 @@ import os
 import librosa
 from augmentation import save_key_trans
 from feature_extraction import extract_chromagram_stft, extract_mfcc, extract_spectrogram
-
+from spec_to_spiral import extract_3d_spiral
 
 def main(args):
     data_type = args.data_type
@@ -34,6 +34,8 @@ def main(args):
                     extract_chromagram_stft(file, sr, f"{sample_name}_key_{i}_noise_{j}", f"{save_dir}/{sample_name}/", type="npy")
                 elif data_type == "spec":
                     extract_spectrogram(file, sr, f"{sample_name}_key_{i}_noise_{j}", f"{save_dir}/{sample_name}/", type="npy")
+                elif data_type == "spiral":
+                    extract_3d_spiral(file, sr, f"{sample_name}_key_{i}_noise_{j}", f"{save_dir}/{sample_name}/", type="npy")
                 
         
 if __name__ == "__main__":
