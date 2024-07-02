@@ -6,23 +6,12 @@ import matplotlib.pyplot as plt
 import os
 import math
 
-# convert spectrogram to spiral
-test = np.load("./save_dir/001_spec.npy")
-test = 1 - (test+80)/80
-
-
-time_slot = test.shape[1]
-freq_slot = test.shape[0]
 
 def polar_to_cartesian(r, theta):
     x = r * math.cos(theta)
     y = r * math.sin(theta)
     return x, y
 
-sampling_rate = 44100 # Hz
-freq_initial = 55 # initial freq A1
-r_init = 1
-theta_init = (np.pi/2)
 
 def cal_r(freq):
 
@@ -48,45 +37,55 @@ def cal_r(freq):
         return 5/15
     else: return 0.
 
-real_time = time_slot * (512/sampling_rate)
 
+def extract_3d_spiral(audio, sr, file_name, save_dir, type="npy"):
+    save_path = save_dir+file_name+"_spiral.npy"
+    audio = librosa.stft(audio)
+    spectrogram = librosa.amplitude_to_db(np.abs(audio), ref=np.max)
+    spectrogram = 1 - (spectrogram+80)/80
 
-freq_list = np.array(range(1025)[1:])*(22050/1024)
-print(freq_list)
-r_list = []
-for i in freq_list:
-    r_list.append(cal_r(i))
-theta_list = (np.pi/2) - 2*np.pi*np.log2(freq_list/freq_initial)
+    time_slot = spectrogram.shape[1]
+    freq_slot = spectrogram.shape[0]
 
-numpy_list = []
-for i in range(time_slot):
-    plt.clf()
-    fig = plt.figure()
-    ax = fig.add_subplot(111, polar=True)
-    A = test[1:,i]
-    for j in range(len(freq_list)):
-        if A[j] == 1: continue
-        else:
-            colors = (A[j], A[j], A[j])  
-            ax.scatter(theta_list[j],r_list[j], marker='o', s=1, c = colors)
+    freq_initial = 55 # initial freq A1
+    r_init = 1
+    theta_init = (np.pi/2)
+    real_time = time_slot * (512/sr)
+    freq_list = np.array(range(1025)[1:])*(22050/1024)
+    r_list = []
+    for i in freq_list:
+        r_list.append(cal_r(i))
+    theta_list = (np.pi/2) - 2*np.pi*np.log2(freq_list/freq_initial)
 
-    ax.xaxis.set_visible(False)
-    ax.yaxis.set_visible(False)
-    ax.grid(False)
+    numpy_list = []
+    for i in range(time_slot):
+        plt.clf()
+        fig = plt.figure()
+        ax = fig.add_subplot(111, polar=True)
+        A = spectrogram[1:,i]
+        for j in range(len(freq_list)):
+            if A[j] == 1: continue
+            else:
+                colors = (A[j], A[j], A[j])  
+                ax.scatter(theta_list[j],r_list[j], marker='o', s=1, c = colors)
+        ax.xaxis.set_visible(False)
+        ax.yaxis.set_visible(False)
+        ax.grid(False)
 
-    fig.canvas.draw()
-    image = np.frombuffer(fig.canvas.tostring_rgb(), dtype=np.uint8)
-    image = image.reshape(fig.canvas.get_width_height()[::-1] + (3,))
-    gray_image = np.dot(image[...,:3], [0.2989, 0.5870, 0.1140])
-    numpy_list.append(gray_image)
-    if i>4300 and i<5000:
-        plt.imsave(f"./save_001_new/polar_coordinates_plot_{i}.jpg", gray_image, cmap='gray')
-    plt.close(fig)
-    print(i)
+        fig.canvas.draw()
+        image = np.frombuffer(fig.canvas.tostring_rgb(), dtype=np.uint8)
+        image = image.reshape(fig.canvas.get_width_height()[::-1] + (3,))
+        gray_image = np.dot(image[...,:3], [0.2989, 0.5870, 0.1140])
+        numpy_list.append(gray_image)
 
-stacked_array = np.stack(numpy_list)
-np.save(f"./save_001_new/polar_coordinates_plot.npy", stacked_array)
-print(stacked_array.shape)
+        #if type == "jpg":
+        #    plt.imsave(f"./save_001_new/polar_coordinates_plot_{i}.jpg", gray_image, cmap='gray')
+        plt.close(fig)
+        print(i)
+    stacked_array = np.stack(numpy_list)
+    np.save(save_path, stacked_array)
+    return 
+    #print(stacked_array.shape)
 
 
 
