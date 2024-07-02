@@ -6,7 +6,7 @@ from feature_extraction import extract_chromagram_stft, extract_mfcc, extract_sp
 # generate save folder
 sample_dir = "./sound_sample"
 sample_list = os.listdir(sample_dir)
-print(sample_list)
+# print(sample_list)
 #sample_name_list =[]
 save_dir = "./save_dir_mfcc"
 os.makedirs(save_dir, exist_ok=True)
@@ -27,7 +27,7 @@ for sample in sample_list:
     for i in transpose_list:
         for j in range(4):
             file, sr = save_key_trans(y, sr, f"{save_dir}/{sample_name}", sample_name, i,j, False)
-            extract_mfcc(file, sr, f"sample_name_key_{i}_noise_{j}", f"{save_dir}/{sample_name}/", type="npy")
+            extract_mfcc(file, sr, f"{sample_name}_key_{i}_noise_{j}", f"{save_dir}/{sample_name}/", type="npy")
             #extract_mfcc(file, sr, f"sample_name_key_{i}_noise_{j}", f"{save_dir}/{sample_name}/", type="jpg")
         
 
